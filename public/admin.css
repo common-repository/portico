@@ -1,0 +1,21 @@
+/**
+ * @package Portico
+ * @author Dan Bettles <dan@danbettles.net>
+ * @copyright Copyright (c) 2010, Dan Bettles
+ * @license http://creativecommons.org/licenses/BSD/ Simplified BSD License
+ */
+
+#portico-customfields label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+#portico-customfields input,
+#portico-customfields select {
+    width: 50%;
+}
+
+#portico-customfields textarea {
+    width: 98%;
+}

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Portico" default="build">
+
+    <property name="builddir" value="${project.basedir}/build" />
+
+    <property name="repositoryurl" value="svn://svn.code.sf.net/p/porticowp/svn/trunk" />
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <target name="preparebuild">
+        <!--Get the path of the svn executable-->
+        <exec command="which svn"
+              outputProperty="svnpath"
+              checkreturn="true" />
+
+        <!--Get the revision number of this working copy-->
+        <svnlastrevision svnpath="${svnpath}"
+                         workingcopy="${project.basedir}"
+                         propertyname="svn.lastrevision" />
+
+        <!--Delete the build directory-->
+        <delete dir="${builddir}"
+                verbose="true"
+                quiet="true"
+                includeemptydirs="true" />
+    </target>
+
+
+    <target name="build" depends="testphp, preparebuild">
+        <!--Export a copy of this working copy-->
+        <svnexport revision="${svn.lastrevision}"
+                   svnpath="${svnpath}"
+                   repositoryurl="${repositoryurl}"
+                   todir="${builddir}" />
+
+        <!--Build API documentation-->
+        <phingcall target="builddocs" />
+
+        <!--Compress the build directory-->
+        <tar destfile="${builddir}/${phing.project.name} r${svn.lastrevision}.tar.gz"
+             basedir="${builddir}"
+             compression="gzip" />
+    </target>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+    <target name="testphp">
+        <phpunit haltonfailure="true"
+                 haltonincomplete="false"
+                 haltonskipped="true">
+
+            <formatter type="plain"
+                       usefile="false" />
+
+            <batchtest>
+                <fileset dir="test">
+                    <include name="**" />
+                </fileset>
+            </batchtest>
+        </phpunit>
+    </target>
+
+
+    <target name="builddocs">
+        <echo msg="Building API documentation..." />
+
+        <phpdoc title="${phing.project.name} API Documentation"
+                destdir="${builddir}/doc"
+                sourcecode="true"
+                quiet="true"
+                output="HTML:Smarty:PHP">
+
+            <fileset dir="${builddir}">
+                <include name="**/*.php" />
+                <exclude name="test/**" />
+            </fileset>
+        </phpdoc>
+    </target>
+
+</project>
